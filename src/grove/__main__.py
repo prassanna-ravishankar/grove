@@ -17,6 +17,10 @@ evaluate_areas -> data/per_turn_areas.jsonl, results-multiway.md
 Third experiment (cascades):
 read_cascade     claude-sonnet-5-5 and claude-haiku-5-5 read every turn -> data/reads_<reader>.jsonl
 evaluate_cascade -> data/per_turn_cascade.jsonl, results-cascade.md
+
+Fourth experiment (usage labels):
+extract_usage  used memories per turn from the orchestrator transcript -> data/usage.jsonl
+evaluate_usage -> results-usage.md
 """
 
 import random
@@ -24,7 +28,7 @@ import sys
 from dataclasses import asdict
 from datetime import datetime
 
-from grove import areas, cascade, forest
+from grove import areas, cascade, forest, usage
 from grove.baseline import rank, turn_tokens
 from grove.corpus import load_corpus, snapshot
 from grove.evaluate import evaluate
@@ -104,6 +108,8 @@ STEPS = {
         areas.evaluate_areas,
         cascade.read_cascade,
         cascade.evaluate_cascade,
+        usage.extract_usage,
+        usage.evaluate_usage,
     )
 }
 

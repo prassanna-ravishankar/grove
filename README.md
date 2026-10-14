@@ -24,6 +24,14 @@ turns) but trades accuracy for calls about linearly. Unlike routing, no cheap
 default is right on continuations. The margin is agreement with an Opus
 labeller reading a similar index, not yet checked against usage.
 
+Fourth experiment, [results-usage.md](results-usage.md): re-scored against
+what the orchestrator did with memory in its transcript, the result does not
+hold. Only 33 of 170 turns name a memory, mostly as an edit; on those the
+baseline leads Sonnet (0.636 vs 0.485, 4-9, p = 0.27), and usage agrees weakly
+with the Opus labels (mean Jaccard 0.14). Usage is itself biased toward the
+recall block the orchestrator was shown, so neither label set is ground truth;
+an online arm or human labels would settle it.
+
 What would reopen it: memories written to a schema at write time (facets
 filled, not inferred from prose), or a usage signal richer than one session's
 turns, so that split questions can be learned from where recall actually
@@ -76,7 +84,9 @@ Run it (Python 3.13, uv; reads local data only, writes to the gitignored
 `uv run python -m grove <step>` for each of `snapshot extract verify label
 spotcheck propose route evaluate`, and for the second experiment
 `route_areas read_areas evaluate_areas`, and for the third
-`read_cascade evaluate_cascade`.
+`read_cascade evaluate_cascade`, and for the fourth `extract_usage
+evaluate_usage` (reads the orchestrator session transcript under
+`~/.claude/projects`).
 
 ## Non-goals
 
