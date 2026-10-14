@@ -1,9 +1,11 @@
 """The orchestrator memory corpus, read exactly as Repowire's recall reads it."""
 
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path.home() / ".repowire" / "orchestrator"
+SNAPSHOT = Path(__file__).resolve().parents[2] / "data" / "corpus"
 MAX_FILE_BYTES = 12000  # daemon.orchestrator_recall.max_file_chars (bytes in Go)
 
 
@@ -14,10 +16,24 @@ class Doc:
     mtime: float
 
 
-def load_corpus(root: Path = ROOT) -> list[Doc]:
+def corpus_paths(root: Path) -> list[Path]:
     """comms.md, projects.md, then memory/*.md sorted, MEMORY.md excluded."""
-    paths = [root / "comms.md", root / "projects.md"]
-    paths += [p for p in sorted(root.glob("memory/*.md")) if p.name != "MEMORY.md"]
+    return [root / "comms.md", root / "projects.md"] + [p for p in sorted(root.glob("memory/*.md")) if p.name != "MEMORY.md"]
+
+
+def snapshot() -> None:
+    """Freeze the live corpus under data/corpus, keeping modification times."""
+    for path in corpus_paths(ROOT):
+        target = SNAPSHOT / path.relative_to(ROOT)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, target)
+    print(f"{len(corpus_paths(SNAPSHOT))} files -> {SNAPSHOT}")
+
+
+def load_corpus(root: Path | None = None) -> list[Doc]:
+    """The snapshot when one exists, else the live directory."""
+    root = root or (SNAPSHOT if SNAPSHOT.exists() else ROOT)
+    paths = corpus_paths(root)
     docs = []
     for path in paths:
         if not path.exists():
