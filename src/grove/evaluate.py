@@ -15,6 +15,7 @@ from typing import Any
 from grove.baseline import Hit, rank, score, top, turn_tokens
 from grove.corpus import Doc, load_corpus
 from grove.forest import FACETS, candidate_stats, path, select
+from grove.frontier import MODEL
 from grove.io import DATA, read_jsonl, write_jsonl
 
 REPO = Path(__file__).resolve().parents[2]
@@ -204,14 +205,14 @@ def cost_section(note: str) -> list[str]:
         by_tag[r["tag"]] += r["input_tokens"]
     jev_tokens = sum(by_tag.values())
     frontier = read_jsonl("frontier_spend.jsonl")
-    out = ["## Cost", "", "Cumulative across both experiments.", ""]
+    out = ["## Cost", "", "Cumulative across all experiments.", ""]
     out += table(
         ["item", "usage", "USD"],
         [
             *[[f"Jev: {tag}", f"{n:,} input tokens", f"{n * 1.21 / 28.8e6:.3f}"] for tag, n in by_tag.items()],
             ["Jev total", f"{jev_tokens:,} input tokens", f"{jev_tokens * 1.21 / 28.8e6:.3f}"],
-            *[[f"claude-opus-5-5: {r['tag']}", f"{r['requests']} requests", f"{r['usd']:.3f}"] for r in frontier],
-            ["claude-opus-5-5 total", "", f"{sum(r['usd'] for r in frontier):.3f}"],
+            *[[f"{r.get('model', MODEL)}: {r['tag']}", f"{r['requests']} requests", f"{r['usd']:.3f}"] for r in frontier],
+            ["frontier total", "", f"{sum(r['usd'] for r in frontier):.3f}"],
         ],
     )
     return out + ["", f"Jev USD is estimated at the router paper's rate ($1.21 per 28.8M input tokens). {note}", ""]

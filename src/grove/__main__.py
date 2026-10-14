@@ -13,6 +13,10 @@ Second experiment (one multi-way facet, soft routing):
 route_areas    Jev over the area list for every memory and turn -> data/areas_jev.jsonl
 read_areas     claude-opus-5-5 over the area list for every turn -> data/areas_opus.jsonl
 evaluate_areas -> data/per_turn_areas.jsonl, results-multiway.md
+
+Third experiment (cascades):
+read_cascade     claude-sonnet-5-5 and claude-haiku-5-5 read every turn -> data/reads_<reader>.jsonl
+evaluate_cascade -> data/per_turn_cascade.jsonl, results-cascade.md
 """
 
 import random
@@ -20,7 +24,7 @@ import sys
 from dataclasses import asdict
 from datetime import datetime
 
-from grove import areas, forest
+from grove import areas, cascade, forest
 from grove.baseline import rank, turn_tokens
 from grove.corpus import load_corpus, snapshot
 from grove.evaluate import evaluate
@@ -84,7 +88,24 @@ def spotcheck() -> None:
     print(DATA / "spotcheck.md")
 
 
-STEPS = {f.__name__: f for f in (snapshot, extract, verify, label, spotcheck, forest.propose, forest.route, evaluate, areas.route_areas, areas.read_areas, areas.evaluate_areas)}
+STEPS = {
+    f.__name__: f
+    for f in (
+        snapshot,
+        extract,
+        verify,
+        label,
+        spotcheck,
+        forest.propose,
+        forest.route,
+        evaluate,
+        areas.route_areas,
+        areas.read_areas,
+        areas.evaluate_areas,
+        cascade.read_cascade,
+        cascade.evaluate_cascade,
+    )
+}
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in STEPS:

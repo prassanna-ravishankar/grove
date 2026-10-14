@@ -14,8 +14,12 @@ from grove.io import append_jsonl
 
 ENV = Path.home() / ".repowire" / "frontier.env"
 MODEL = "claude-opus-5-5"
-# USD per token: input, output, cache write (5 min), cache read.
-PRICE = {"input": 4e-6, "output": 20e-6, "cache_write": 5e-6, "cache_read": 0.2e-6}
+# USD per token: input, output, cache write (5 min, 1.25x input), cache read.
+PRICE = {
+    "claude-opus-5-5": {"input": 4e-6, "output": 20e-6, "cache_write": 5e-6, "cache_read": 0.2e-6},
+    "claude-sonnet-5-5": {"input": 2e-6, "output": 10e-6, "cache_write": 2.5e-6, "cache_read": 0.2e-6},
+    "claude-haiku-5-5": {"input": 0.1e-6, "output": 0.5e-6, "cache_write": 0.125e-6, "cache_read": 0.01e-6},
+}
 
 
 def client() -> anthropic.Anthropic:
@@ -24,12 +28,13 @@ def client() -> anthropic.Anthropic:
     return anthropic.Anthropic(api_key=env["ANTHROPIC_API_KEY"].strip(), default_headers=headers)
 
 
-def cost(usage) -> float:
+def cost(usage, model: str = MODEL) -> float:
+    price = PRICE[model]
     return (
-        usage.input_tokens * PRICE["input"]
-        + usage.output_tokens * PRICE["output"]
-        + (usage.cache_creation_input_tokens or 0) * PRICE["cache_write"]
-        + (usage.cache_read_input_tokens or 0) * PRICE["cache_read"]
+        usage.input_tokens * price["input"]
+        + usage.output_tokens * price["output"]
+        + (usage.cache_creation_input_tokens or 0) * price["cache_write"]
+        + (usage.cache_read_input_tokens or 0) * price["cache_read"]
     )
 
 
@@ -54,12 +59,13 @@ def run(c: anthropic.Anthropic, requests: list[Request], tag: str, workers: int 
             print(f"{req['custom_id']}: {err.status_code}")
             out[req["custom_id"]] = None
             return
-        spend.append(cost(message.usage))
+        spend.append(cost(message.usage, req["params"]["model"]))
         out[req["custom_id"]] = parse(message)
 
     one(requests[0])
     with ThreadPoolExecutor(workers) as pool:
         list(pool.map(one, requests[1:]))
-    append_jsonl("frontier_spend.jsonl", {"tag": tag, "requests": len(requests), "usd": round(sum(spend), 4)})
+    model = requests[0]["params"]["model"]
+    append_jsonl("frontier_spend.jsonl", {"tag": tag, "model": model, "requests": len(requests), "usd": round(sum(spend), 4)})
     print(f"{tag}: {len(requests)} requests, ${sum(spend):.3f}, {sum(v is None for v in out.values())} failed")
     return out
