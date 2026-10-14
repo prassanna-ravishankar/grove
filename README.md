@@ -7,7 +7,9 @@ partition, and recall follows the same path. Several trees with different
 questions, results unioned, give robustness; the trees stay readable and
 editable by a human.
 
-Status: seed, 2026-10-14. Nothing is built. This README is the scope.
+Status: first experiment run, 2026-10-14; see [results.md](results.md). On real
+orchestrator turns a three-question tree loses to token-overlap recall,
+most clearly on topic switches.
 
 ## Thesis
 
@@ -50,6 +52,11 @@ previous one, so the decisions worth optimising are the switches.
 - Metric: hit@k per turn, split by continuation versus topic switch, paired
   sign test, same protocol as the router paper.
 - Budget: one shallow tree, three facets, one day.
+
+Run it (Python 3.13, uv; reads local data only, writes to the gitignored
+`data/`): copy `~/.repowire/state.db` to `data/state.db`, then
+`uv run python -m grove <step>` for each of `extract verify label spotcheck
+propose route evaluate`.
 
 ## Non-goals
 

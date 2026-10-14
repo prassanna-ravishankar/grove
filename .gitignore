@@ -3,3 +3,5 @@ data/
 *.rows
 *.jsonl
 .env
+__pycache__/
+.venv/

@@ -1,0 +1,19 @@
+[project]
+name = "grove"
+version = "0.1.0"
+description = "Decision-forest memory recall experiments"
+authors = [
+    { name = "Prass, The Nomadic Coder", email = "atemysemicolon@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "anthropic>=1.13.0",
+    "httpx>=0.28.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 200
