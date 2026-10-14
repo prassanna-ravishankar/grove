@@ -1,0 +1,5 @@
+# local data, never committed
+data/
+*.rows
+*.jsonl
+.env
