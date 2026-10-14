@@ -11,7 +11,15 @@ Status: two experiments run, 2026-10-14. [results.md](results.md): on real
 orchestrator turns a three-question tree loses to token-overlap recall,
 most clearly on topic switches. [results-multiway.md](results-multiway.md):
 one project facet, used as a hard filter or a score boost, does not beat it
-on switches either, and an Opus reader does no better than Jev.
+on switches either, and an Opus reader does no better than Jev. The loss is
+the partition structure, not the classifier: apparent wins on unfiltered labels
+come from always-on memories landing in small partitions and vanish on topical
+labels. Recorded as a negative result; total spend about three dollars.
+
+What would reopen it: memories written to a schema at write time (facets
+filled, not inferred from prose), or a usage signal richer than one session's
+turns, so that split questions can be learned from where recall actually
+switches.
 
 ## Thesis
 
