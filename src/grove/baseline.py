@@ -6,8 +6,8 @@ dropped; ties break by label; at most MAX_HITS.
 """
 
 import re
-from collections.abc import Iterable
-from dataclasses import dataclass
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass, replace
 
 from grove.corpus import Doc
 
@@ -57,7 +57,18 @@ def score(tokens: set[str], doc: Doc) -> Hit | None:
     return Hit(doc.label, best, total)
 
 
+def turn_tokens(turn: dict) -> set[str]:
+    """The daemon's query for a delivered turn: text, sender name and id, target name, id and circle."""
+    return query_tokens(turn["body"], turn["sender"], turn["sender_id"], turn["target"], turn["target_id"], "1")
+
+
+def top(hits: Iterable[Hit], limit: int | None = MAX_HITS, bonus: Callable[[str], int] | None = None) -> list[Hit]:
+    """Order scored hits as the daemon does, optionally adding a bonus per label."""
+    if bonus:
+        hits = [replace(h, score=h.score + bonus(h.label)) for h in hits]
+    ordered = sorted(hits, key=lambda h: (-h.score, h.label))
+    return ordered[:limit] if limit else ordered
+
+
 def rank(tokens: set[str], docs: Iterable[Doc], limit: int | None = MAX_HITS) -> list[Hit]:
-    hits = [h for h in (score(tokens, d) for d in docs) if h]
-    hits.sort(key=lambda h: (-h.score, h.label))
-    return hits[:limit] if limit else hits
+    return top([h for h in (score(tokens, d) for d in docs) if h], limit)

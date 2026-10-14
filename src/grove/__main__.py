@@ -1,5 +1,6 @@
 """grove experiment steps: python -m grove <step>.
 
+snapshot copy the live corpus to data/corpus (later steps read the snapshot)
 extract  turns from data/state.db (a copy of ~/.repowire/state.db) -> data/turns.jsonl
 verify   ported baseline against the recorded recall blocks -> data/verify.jsonl
 label    frontier usefulness labels -> data/labels.jsonl
@@ -7,6 +8,11 @@ spotcheck 30 labelled turns for a human check -> data/spotcheck.md
 propose  frontier split-question candidates -> data/candidates.json
 route    Jev answers for every candidate on every memory and turn -> data/routes.jsonl
 evaluate select the tree, score both recalls -> data/per_turn.jsonl, results.md
+
+Second experiment (one multi-way facet, soft routing):
+route_areas    Jev over the area list for every memory and turn -> data/areas_jev.jsonl
+read_areas     claude-opus-5-5 over the area list for every turn -> data/areas_opus.jsonl
+evaluate_areas -> data/per_turn_areas.jsonl, results-multiway.md
 """
 
 import random
@@ -14,9 +20,9 @@ import sys
 from dataclasses import asdict
 from datetime import datetime
 
-from grove import forest
-from grove.baseline import query_tokens, rank
-from grove.corpus import load_corpus
+from grove import areas, forest
+from grove.baseline import rank, turn_tokens
+from grove.corpus import load_corpus, snapshot
 from grove.evaluate import evaluate
 from grove.frontier import client, run
 from grove.io import DATA, read_jsonl, write_jsonl
@@ -24,11 +30,6 @@ from grove.label import request
 from grove.turns import load_turns
 
 SINCE = "2026-09-30"  # 14 days before 2026-10-14
-
-
-def baseline_tokens(turn: dict) -> set[str]:
-    """The daemon's query: text, sender name and id, target name, id and circle."""
-    return query_tokens(turn["body"], turn["sender"], turn["sender_id"], turn["target"], turn["target_id"], "1")
 
 
 def extract() -> None:
@@ -47,7 +48,7 @@ def verify() -> None:
     docs = load_corpus()
     rows = []
     for turn in read_jsonl("turns.jsonl"):
-        ported = [h.label for h in rank(baseline_tokens(turn), docs)]
+        ported = [h.label for h in rank(turn_tokens(turn), docs)]
         logged = datetime.fromisoformat(turn["ts"]).timestamp()
         changed = {d.label for d in docs if d.mtime > logged - 300}
         differing = set(ported) ^ set(turn["recorded"]) or set(ported)
@@ -83,7 +84,7 @@ def spotcheck() -> None:
     print(DATA / "spotcheck.md")
 
 
-STEPS = {f.__name__: f for f in (extract, verify, label, spotcheck, forest.propose, forest.route, evaluate)}
+STEPS = {f.__name__: f for f in (snapshot, extract, verify, label, spotcheck, forest.propose, forest.route, evaluate, areas.route_areas, areas.read_areas, areas.evaluate_areas)}
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in STEPS:

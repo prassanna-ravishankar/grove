@@ -7,9 +7,11 @@ partition, and recall follows the same path. Several trees with different
 questions, results unioned, give robustness; the trees stay readable and
 editable by a human.
 
-Status: first experiment run, 2026-10-14; see [results.md](results.md). On real
+Status: two experiments run, 2026-10-14. [results.md](results.md): on real
 orchestrator turns a three-question tree loses to token-overlap recall,
-most clearly on topic switches.
+most clearly on topic switches. [results-multiway.md](results-multiway.md):
+one project facet, used as a hard filter or a score boost, does not beat it
+on switches either, and an Opus reader does no better than Jev.
 
 ## Thesis
 
@@ -55,8 +57,9 @@ previous one, so the decisions worth optimising are the switches.
 
 Run it (Python 3.13, uv; reads local data only, writes to the gitignored
 `data/`): copy `~/.repowire/state.db` to `data/state.db`, then
-`uv run python -m grove <step>` for each of `extract verify label spotcheck
-propose route evaluate`.
+`uv run python -m grove <step>` for each of `snapshot extract verify label
+spotcheck propose route evaluate`, and for the second experiment
+`route_areas read_areas evaluate_areas`.
 
 ## Non-goals
 
