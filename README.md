@@ -7,35 +7,27 @@ partition, and recall follows the same path. Several trees with different
 questions, results unioned, give robustness; the trees stay readable and
 editable by a human.
 
-Status: two experiments run, 2026-10-14. [results.md](results.md): on real
-orchestrator turns a three-question tree loses to token-overlap recall,
-most clearly on topic switches. [results-multiway.md](results-multiway.md):
-one project facet, used as a hard filter or a score boost, does not beat it
-on switches either, and an Opus reader does no better than Jev. The loss is
-the partition structure, not the classifier: apparent wins on unfiltered labels
-come from always-on memories landing in small partitions and vanish on topical
-labels. Recorded as a negative result; total spend about three dollars.
+Status: four experiments, 2026-10-14. Closed as unresolved on the main
+question and negative on the forest. [results.md](results.md): a three-question
+tree loses to token-overlap recall. [results-multiway.md](results-multiway.md):
+one project facet, hard or soft, does no better, and an Opus reader does no
+better than Jev. [results-cascade.md](results-cascade.md): against labels
+written by Opus over the memory index, a frontier reader of the same index
+scores .86 on topic-switch turns against .39 for token overlap, and cascades
+on observable triggers trade accuracy for calls linearly.
+[results-usage.md](results-usage.md): against the memories the orchestrator
+actually opened or edited (33 of 170 turns name one), the reader does not beat
+token overlap (Sonnet .49 vs .64, Haiku .30), and usage overlaps the Opus labels
+only weakly (mean Jaccard .14). The exp 3 margin was agreement between two
+frontier models reading the same index, not measured usefulness. The usage
+signal is itself thin and selected by what recall showed, so neither side is
+ground truth.
 
-Third experiment, [results-cascade.md](results-cascade.md): a frontier reader
-over the memory index (Sonnet 5.5) beats token overlap by a wide margin on
-continuations and switches alike, so a cascade beats the baseline on switches
-at any useful call share (project-change trigger: 0.661 vs 0.390 at 27% of
-turns) but trades accuracy for calls about linearly. Unlike routing, no cheap
-default is right on continuations. The margin is agreement with an Opus
-labeller reading a similar index, not yet checked against usage.
-
-Fourth experiment, [results-usage.md](results-usage.md): re-scored against
-what the orchestrator did with memory in its transcript, the result does not
-hold. Only 33 of 170 turns name a memory, mostly as an edit; on those the
-baseline leads Sonnet (0.636 vs 0.485, 4-9, p = 0.27), and usage agrees weakly
-with the Opus labels (mean Jaccard 0.14). Usage is itself biased toward the
-recall block the orchestrator was shown, so neither label set is ground truth;
-an online arm or human labels would settle it.
-
-What would reopen it: memories written to a schema at write time (facets
-filled, not inferred from prose), or a usage signal richer than one session's
-turns, so that split questions can be learned from where recall actually
-switches.
+What would settle it: an online shadow arm in Repowire that records a frontier
+read beside the recall block on every turn, scored later against what the
+orchestrator used, or human labels on a few hundred turns. Cost of the arm:
+about $0.0003 per turn with Haiku and the index cached. Total spend here:
+about five dollars.
 
 ## Thesis
 
