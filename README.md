@@ -16,6 +16,14 @@ the partition structure, not the classifier: apparent wins on unfiltered labels
 come from always-on memories landing in small partitions and vanish on topical
 labels. Recorded as a negative result; total spend about three dollars.
 
+Third experiment, [results-cascade.md](results-cascade.md): a frontier reader
+over the memory index (Sonnet 5.5) beats token overlap by a wide margin on
+continuations and switches alike, so a cascade beats the baseline on switches
+at any useful call share (project-change trigger: 0.661 vs 0.390 at 27% of
+turns) but trades accuracy for calls about linearly. Unlike routing, no cheap
+default is right on continuations. The margin is agreement with an Opus
+labeller reading a similar index, not yet checked against usage.
+
 What would reopen it: memories written to a schema at write time (facets
 filled, not inferred from prose), or a usage signal richer than one session's
 turns, so that split questions can be learned from where recall actually
@@ -67,7 +75,8 @@ Run it (Python 3.13, uv; reads local data only, writes to the gitignored
 `data/`): copy `~/.repowire/state.db` to `data/state.db`, then
 `uv run python -m grove <step>` for each of `snapshot extract verify label
 spotcheck propose route evaluate`, and for the second experiment
-`route_areas read_areas evaluate_areas`.
+`route_areas read_areas evaluate_areas`, and for the third
+`read_cascade evaluate_cascade`.
 
 ## Non-goals
 
